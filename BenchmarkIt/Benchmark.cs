@@ -52,24 +52,24 @@ namespace BenchmarkIt
 		/// <summary>
 		/// Runs the benchmark and returns the result
 		/// </summary>
-		public Result Run ()
+		public Result Run (string label = null)
 		{
 		    switch (_constraint.Type)
 		    {
 		        case BenchmarkType.Seconds:
-		            return RunForTime(DateTime.Now.AddSeconds(_amount));
+		            return RunForTime(label, DateTime.Now.AddSeconds(_amount));
 		        case BenchmarkType.Minutes:
-		            return RunForTime(DateTime.Now.AddMinutes(_amount));
+		            return RunForTime(label, DateTime.Now.AddMinutes(_amount));
 		        case BenchmarkType.Hours:
-		            return RunForTime(DateTime.Now.AddHours(_amount));
+		            return RunForTime(label, DateTime.Now.AddHours(_amount));
 		        case BenchmarkType.Iterations:
-		            return RunIterations();
+		            return RunIterations(label);
                 default:
                     throw new ArgumentException("Unsupported run type: " + _constraint.Type);
 		    }
 		}
 
-		private Result RunIterations() {
+		private Result RunIterations(string label) {
 
 			for (int i = 0; i < _cacheWarmup; i++) {
 				_function ();
@@ -81,14 +81,14 @@ namespace BenchmarkIt
 			}
 			sw.Stop ();
 
-			var result = new Result ();
+            var result = new Result(label, _constraint.Type);
 			result.Stopwatch = sw;
 			result.TotalIterations = _amount;
 
 			return result;
 		}
 
-		private Result RunForTime(DateTime until) {
+		private Result RunForTime(string label, DateTime until) {
 			for (int i = 0; i < _cacheWarmup; i++) {
 				_function ();
 			}
@@ -102,7 +102,7 @@ namespace BenchmarkIt
 
 			sw.Stop ();
 
-			var result = new Result ();
+			var result = new Result (label, _constraint.Type);
 			result.Stopwatch = sw;
 			result.TotalIterations = count;
 
