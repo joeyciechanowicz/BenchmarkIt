@@ -8,17 +8,17 @@ namespace BenchmarkIt
 	/// </summary>
 	public class Benchmark
 	{
-		private Action function;
-		private int amount;
-		private BenchmarkType type;
-		private int cacheWarmup = 0;
-		private Constraint constraint;
+        private readonly Action _function;
+		private int _amount;
+		private int _cacheWarmup = 0;
+		private Constraint _constraint;
 
-		private Benchmark(Action function) {
-			this.function = function;
+		private Benchmark(Action function)
+		{
+		    _function = function;
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// Create a new benchmark
 		/// </summary>
 		/// <param name="function">Function to be benchmarked</param>
@@ -31,9 +31,9 @@ namespace BenchmarkIt
 		/// </summary>
 		/// <param name="amount">Amount.</param>
 		public Constraint For(int amount) {
-			this.amount = amount;
-			this.constraint = new Constraint (this);
-			return this.constraint;
+			_amount = amount;
+			_constraint = new Constraint (this);
+			return _constraint;
 		}
 
 		/// <summary>
@@ -45,7 +45,7 @@ namespace BenchmarkIt
 			if (n < 0) {
 				throw new ArgumentException ("The number of warmup iterations can not be negative");
 			}
-			this.cacheWarmup = n;
+			this._cacheWarmup = n;
 			return this;
 		}
 
@@ -54,54 +54,50 @@ namespace BenchmarkIt
 		/// </summary>
 		public Result Run ()
 		{
-			if (type == BenchmarkType.Iterations) {
-				return RunIterations ();
-			} else {
-				DateTime until;
-				switch (type) {
-					case BenchmarkType.Seconds:
-						until = DateTime.Now.AddSeconds (amount);
-						break;
-					case BenchmarkType.Minutes:
-						until = DateTime.Now.AddMinutes (amount);
-						break;
-					case BenchmarkType.Hours:
-						until = DateTime.Now.AddHours (amount);
-						break;
-				}
-				return RunForTime (until);
-			}
+		    switch (_constraint.Type)
+		    {
+		        case BenchmarkType.Seconds:
+		            return RunForTime(DateTime.Now.AddSeconds(_amount));
+		        case BenchmarkType.Minutes:
+		            return RunForTime(DateTime.Now.AddMinutes(_amount));
+		        case BenchmarkType.Hours:
+		            return RunForTime(DateTime.Now.AddHours(_amount));
+		        case BenchmarkType.Iterations:
+		            return RunIterations();
+                default:
+                    throw new ArgumentException("Unsupported run type: " + _constraint.Type);
+		    }
 		}
 
 		private Result RunIterations() {
 
-			for (int i = 0; i < cacheWarmup; i++) {
-				function ();
+			for (int i = 0; i < _cacheWarmup; i++) {
+				_function ();
 			}
 
 			Stopwatch sw = Stopwatch.StartNew ();
-			for (int i = 0; i < this.amount; i++) {
-				function ();
+			for (int i = 0; i < this._amount; i++) {
+				_function ();
 			}
 			sw.Stop ();
 
 			var result = new Result ();
 			result.Stopwatch = sw;
-			result.TotalIterations = amount;
+			result.TotalIterations = _amount;
 
 			return result;
 		}
 
 		private Result RunForTime(DateTime until) {
-			for (int i = 0; i < cacheWarmup; i++) {
-				function ();
+			for (int i = 0; i < _cacheWarmup; i++) {
+				_function ();
 			}
 
 			int count = 0;
 			Stopwatch sw = Stopwatch.StartNew ();
 			while (DateTime.Now < until) {
 				count++;
-				function ();
+				_function ();
 			}
 
 			sw.Stop ();

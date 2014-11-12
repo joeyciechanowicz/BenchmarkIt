@@ -3,15 +3,16 @@
 namespace BenchmarkIt
 {
 	public class Constraint {
-		private Benchmark benchmark;
+		private readonly Benchmark _benchmark;
 
-		private BenchmarkType type;
-		internal BenchmarkType Type {
-			get { return type; }
+		private BenchmarkType _type;
+		
+        internal BenchmarkType Type {
+			get { return _type; }
 		}
 
 		internal Constraint(Benchmark benchmark) {
-			this.benchmark = benchmark;
+			_benchmark = benchmark;
 		}
 
 		/// <summary>
@@ -20,8 +21,8 @@ namespace BenchmarkIt
 		/// <value>The iterations.</value>
 		public Benchmark Iterations {
 			get {
-				this.type = BenchmarkType.Iterations;
-				return this.benchmark;
+				_type = BenchmarkType.Iterations;
+				return _benchmark;
 			}
 		}
 
@@ -31,8 +32,8 @@ namespace BenchmarkIt
 		/// <value>The benchmark</value>
 		public Benchmark Seconds {
 			get {
-				this.type = BenchmarkType.Seconds;
-				return this.benchmark;
+				_type = BenchmarkType.Seconds;
+				return _benchmark;
 			}
 		}
 
@@ -42,8 +43,8 @@ namespace BenchmarkIt
 		/// <value>The benchmark</value>
 		public Benchmark Minutes {
 			get {
-				this.type = BenchmarkType.Minutes;
-				return this.benchmark;
+				_type = BenchmarkType.Minutes;
+				return _benchmark;
 			}
 		}
 
@@ -53,8 +54,8 @@ namespace BenchmarkIt
 		/// <value>The benchmark</value>
 		public Benchmark Hours {
 			get {
-				this.type = BenchmarkType.Hours;
-				return this.benchmark;
+				_type = BenchmarkType.Hours;
+				return _benchmark;
 			}
 		}
 	}

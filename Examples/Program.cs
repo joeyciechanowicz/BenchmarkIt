@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using BenchmarkIt;
 using System.Threading;
 
@@ -9,13 +10,11 @@ namespace Examples
 		public static void Main (string[] args)
 		{
 			var sleepResult = Benchmark
-				.This (() => {
-					Thread.Sleep (1);
-				})
+				.This (() => Thread.Sleep (500))
 				.For (10).Seconds
 				.Run ();
 
-			Console.Write (sleepResult.Stats);
+            Debug.Write(sleepResult.Stats);
 		}
 	}
 }
