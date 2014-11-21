@@ -93,9 +93,11 @@ namespace BenchmarkIt
 				_function ();
 			}
 
+			var timeUntilStop = until - DateTime.Now;
+
 			int count = 0;
 			Stopwatch sw = Stopwatch.StartNew ();
-			while (DateTime.Now < until) {
+			while (sw.Elapsed <= timeUntilStop) {
 				count++;
 				_function ();
 			}

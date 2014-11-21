@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
+# Visual Studio 2012
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkIt", "BenchmarkIt\BenchmarkIt.csproj", "{68B3ADDC-3F9E-4205-A471-21D553966F7F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{8B4B91C2-69C0-4A28-B2DB-F2B4F58C49B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkIt.Test", "BenchmarkIt.Test\BenchmarkIt.Test.csproj", "{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Debug|x86.Build.0 = Debug|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Release|x86.ActiveCfg = Release|Any CPU
+		{37F4CA2B-D3B1-4F73-B0BC-2F76CB2453A4}.Release|x86.Build.0 = Release|Any CPU
 		{68B3ADDC-3F9E-4205-A471-21D553966F7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{68B3ADDC-3F9E-4205-A471-21D553966F7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68B3ADDC-3F9E-4205-A471-21D553966F7F}.Debug|x86.ActiveCfg = Debug|x86
@@ -31,6 +41,9 @@ Global
 		{8B4B91C2-69C0-4A28-B2DB-F2B4F58C49B3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B4B91C2-69C0-4A28-B2DB-F2B4F58C49B3}.Release|x86.ActiveCfg = Release|x86
 		{8B4B91C2-69C0-4A28-B2DB-F2B4F58C49B3}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = BenchmarkIt\BenchmarkIt.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
