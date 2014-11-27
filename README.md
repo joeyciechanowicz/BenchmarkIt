@@ -4,10 +4,11 @@ Benchmark.It
 Simple easy .NET benchmarking for little bits of code. When you just really want to see if one method is actually faster than another.
 
 ## Install
-
+Run the following command in the Package Manager Console (NuGet).
 ```bash
 PM> Install-Package Benchmark.It
 ```
+Or clone and include BenchmarkIt.csproj directly
 # Use
 Lets say you wanted to see if string.Contains was faster or slower than string.IndexOf. Simply write the following and have it printed out nicely for you to see.
 ```csharp
