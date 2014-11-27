@@ -60,6 +60,8 @@ namespace BenchmarkIt.Test
                 .For(1).Seconds();
 
             Assert.AreEqual(2, result.Length);
+            Assert.Greater(result[0].TotalIterations, 1);
+            Assert.Greater(result[1].TotalIterations, 1);
             Assert.Greater(result[0].TotalIterations, result[1].TotalIterations);
 
             // check that no extension is thrown printing results

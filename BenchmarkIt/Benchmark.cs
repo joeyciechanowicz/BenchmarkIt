@@ -78,11 +78,11 @@ namespace BenchmarkIt
             switch (_constraint.Type)
             {
                 case BenchmarkType.Seconds:
-                    return RunForTime(DateTime.Now.AddSeconds(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(_amount));
                 case BenchmarkType.Minutes:
-                    return RunForTime(DateTime.Now.AddMinutes(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(_amount));
                 case BenchmarkType.Hours:
-                    return RunForTime(DateTime.Now.AddHours(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(_amount));
                 default:
                     return RunIterations();
             }
@@ -131,7 +131,7 @@ namespace BenchmarkIt
             return results;
         }
 
-        private Result[] RunForTime(DateTime until)
+        private Result[] RunForTime(TimeSpan amount)
         {
             var results = new Result[_functions.Count];
 
@@ -145,12 +145,10 @@ namespace BenchmarkIt
                     function();
                 }
 
-                var timeUntilStop = until - DateTime.Now;
-
                 // run the function until we hit the desired time
                 int count = 0;
                 Stopwatch sw = Stopwatch.StartNew();
-                while (sw.Elapsed <= timeUntilStop)
+                while (sw.Elapsed.Ticks <= amount.Ticks)
                 {
                     count++;
                     function();

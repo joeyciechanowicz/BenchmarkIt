@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using BenchmarkIt;
 using System.Threading;
 
@@ -9,6 +10,12 @@ namespace Examples
 	{
 		public static void Main (string[] args)
 		{
+            Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
+            .Against.This("string.IndexOf", () => "abcdef".IndexOf("ef"))
+            .For(5)
+            .Seconds().PrintComparison();
+
+		    Console.Read();
 
 		    Benchmark.This("Fast", () =>
 		    {
