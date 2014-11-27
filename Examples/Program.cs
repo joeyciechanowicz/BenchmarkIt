@@ -9,53 +9,53 @@ namespace Examples
 	{
 		public static void Main (string[] args)
 		{
-		    var quickIterationResult = Benchmark.This(() =>
+
+		    Benchmark.This("Fast", () =>
 		    {
 		        int i;
-		    }).For(100000).Iterations.Run("Fast");
-
-            var meadianIterationResult = Benchmark.This(() =>
+		    })
+            .Against.This("Median",() =>
             {
                 for (int i = 0; i < 100; i++)
                 {
                     var x = Math.Sin(Math.Cos(i));
                 }
-            }).For(100000).Iterations.Run("Median");
-
-            var slowIterationResult = Benchmark.This(() =>
+            })
+            .Against.This("Slow", () =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
                     var x = Math.Sin(Math.Cos(i));
                 }
-            }).For(100000).Iterations.Run("Slow");
-
-            quickIterationResult.Compare(meadianIterationResult, slowIterationResult);
-		    
+            })
+            .For(100000)
+            .Iterations()
+            .PrintComparison();
+            
             Console.WriteLine();
 
-		    var quickTimeResult = Benchmark.This(() =>
+		    Benchmark.This("Fast", () =>
 		    {
 		        int i;
-		    }).For(5).Seconds.Run("Fast");
-
-            var medianTimeResult = Benchmark.This(() =>
+		    })
+            .Against.This("Median", () =>
             {
                 for (int i = 0; i < 100; i++)
                 {
                     var x = Math.Sin(Math.Cos(i));
                 }
-            }).For(5).Seconds.Run("Median");
-
-            var slowTimeResult = Benchmark.This(() =>
+            })
+            .Against.This("Slow", () =>
             {
                 for (int i = 0; i < 100000; i++)
                 {
                     var x = Math.Sin(Math.Cos(i));
                 }
-            }).For(5).Seconds.Run("Slow");
+            })
+            .For(5)
+            .Seconds()
+            .PrintComparison();
 
-            Result.PrintComparison(quickTimeResult, medianTimeResult, slowTimeResult);
 		    Console.Read();
 		}
 	}

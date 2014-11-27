@@ -33,17 +33,9 @@ namespace BenchmarkIt
 			get {
 				var sb = new StringBuilder ();
 
-			    if (!string.IsNullOrEmpty(_label))
-			    {
-			        sb.Append("----- Stats for ");
-			        sb.Append(_label);
-			        sb.AppendLine("-----");
-			    }
-			    else
-			    {
-			        sb.AppendLine("---- Stats ----");
-			    }
-                
+			    sb.Append("-----");
+			    sb.Append(_label);
+			    sb.AppendLine("-----");
 				sb.AppendLine ("Total time: " + Stopwatch.Elapsed);
 				sb.AppendLine ("Ticks per execute: " + Stopwatch.ElapsedTicks / TotalIterations);
 				sb.AppendLine ("Milliseconds per execute: " + Stopwatch.ElapsedMilliseconds / TotalIterations);
@@ -56,19 +48,12 @@ namespace BenchmarkIt
 	    {
 	        var originalColor = Console.ForegroundColor;
 
-            if (!string.IsNullOrEmpty(_label))
-            {
-                Console.Write("----- Stats for ");
+            Console.Write("----- Stats for ");
 
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write(_label);
-                Console.ForegroundColor = originalColor;
-                Console.WriteLine("-----");
-            }
-            else
-            {
-                Console.WriteLine("---- Stats ----");
-            }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write(_label);
+            Console.ForegroundColor = originalColor;
+            Console.WriteLine("-----");
 
 	        Console.Write("Total time: ");
 	        Console.ForegroundColor = ConsoleColor.Red;
@@ -126,12 +111,7 @@ namespace BenchmarkIt
 	                throw new ArgumentException(
 	                    "Can not compare results that are of a different metric (i.e. one time based, another iteration based)");
 	            }
-
-	            if (string.IsNullOrEmpty(result._label))
-	            {
-	                result._label = "Result " + (i + 1);
-	            }
-
+                
 	            // we are intrested in iterations
 	            if (leastIterations.TotalIterations > result.TotalIterations)
 	            {
