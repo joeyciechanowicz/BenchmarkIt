@@ -25,11 +25,17 @@ string.IndexOf  19055089        72.8179573326595%
 
 Or you wanted to see if a for loop was actually faster than a foreach loop (it is).
 ```csharp
-var values = Enumerable.Range(1, 10000).ToArray();
-Benchmark.This("for", () =>
+var values = Enumerable.Range(1, 100000).ToArray();
+Benchmark.This("for.Count", () =>
 {
     for (int i = 0; i < values.Count(); i++)
     {
+        int x = values[i];
+    }
+})
+.Against.This("for.Length", () =>
+{
+    for (int i = 0; i < values.Length; i++) {
         int x = values[i];
     }
 })
