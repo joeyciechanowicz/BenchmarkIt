@@ -7,6 +7,10 @@
     <OutputType>Library</OutputType>
     <RootNamespace>BenchmarkIt</RootNamespace>
     <AssemblyName>BenchmarkIt</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,6 +54,7 @@
     <Compile Include="BenchmarkType.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="Constraint.cs" />
+    <Compile Include="ResultColumn.cs" />
     <Compile Include="ResultExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
