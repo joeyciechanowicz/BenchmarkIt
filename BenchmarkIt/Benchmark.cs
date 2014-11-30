@@ -112,6 +112,11 @@ namespace BenchmarkIt
                     function();
                 }
 
+                // Give the test as good a chance as possible of avoiding garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
                 // benchmark them
                 Stopwatch sw = Stopwatch.StartNew();
                 for (int i = 0; i < this._amount; i++)
@@ -144,6 +149,11 @@ namespace BenchmarkIt
                 {
                     function();
                 }
+
+                // Give the test as good a chance as possible of avoiding garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 // run the function until we hit the desired time
                 int count = 0;
