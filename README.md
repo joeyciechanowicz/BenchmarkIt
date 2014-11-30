@@ -19,8 +19,8 @@ Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
 ```
 ```
 Name    Iterations      Percent
-string.Contains 26168118        100%
-string.IndexOf  19055089        72.8179573326595%
+Name                                    Iterations          Percent                       
+string.Contains                         23117812            100%                          string.IndexOf                          10852501            46.9%
 ```
 
 Or you wanted to see if a for loop was actually faster than a foreach loop (it is).
@@ -48,9 +48,8 @@ Benchmark.This("for.Count", () =>
 .PrintComparison();
 ```
 ```
-Name    Ticks           MS      Percent
-for     10526492        4001    1091.26129852574%
-foreach 964617          366     100%
+Name                                    Milliseconds        Percent                       
+for.Count                               34305               920.8%                        for.Length                              3725                100%                          foreach                                 4341                116.5%
 ```
 
 And why stop there, you can add as many different methods as you want.
