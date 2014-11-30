@@ -12,7 +12,7 @@ namespace BenchmarkIt
         private readonly List<Tuple<string, Action>> _functions;
 
         private int _amount;
-        private int _warmup;
+        private int _warmup=1;
 
         private readonly Constraint _constraint;
         private readonly Against _against;
@@ -62,9 +62,9 @@ namespace BenchmarkIt
         /// <value>The benchmark</value>
         public Benchmark WithWarmup(int n)
         {
-            if (n < 0)
+            if (n < 1)
             {
-                throw new ArgumentException("The number of warmup iterations can not be negative");
+                throw new ArgumentException("The number of warmup iterations can not be less than one");
             }
             _warmup = n;
             return this;
@@ -112,6 +112,11 @@ namespace BenchmarkIt
                     function();
                 }
 
+                // Give the test as good a chance as possible of avoiding garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
                 // benchmark them
                 Stopwatch sw = Stopwatch.StartNew();
                 for (int i = 0; i < this._amount; i++)
@@ -144,6 +149,11 @@ namespace BenchmarkIt
                 {
                     function();
                 }
+
+                // Give the test as good a chance as possible of avoiding garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 // run the function until we hit the desired time
                 int count = 0;
