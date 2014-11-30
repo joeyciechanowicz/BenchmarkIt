@@ -43,7 +43,7 @@ Global
 		{8B4B91C2-69C0-4A28-B2DB-F2B4F58C49B3}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = BenchmarkIt\BenchmarkIt.csproj
+		StartupItem = Examples\Examples.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

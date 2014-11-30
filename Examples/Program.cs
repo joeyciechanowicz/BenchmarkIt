@@ -10,60 +10,37 @@ namespace Examples
 	{
 		public static void Main (string[] args)
 		{
-            Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
-            .Against.This("string.IndexOf", () => "abcdef".IndexOf("ef"))
-            .For(5)
-            .Seconds().PrintComparison();
+			Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
+				.Against.This("string.IndexOf", () => "abcdef".IndexOf("ef"))
+				.For(5)
+				.Seconds().PrintComparison();
 
-		    Console.Read();
+			var values = Enumerable.Range(1, 100000).ToArray();
+			Benchmark.This("for.Count", () =>
+				{
+					for (int i = 0; i < values.Count(); i++)
+					{
+						int x = values[i];
+					}
+				})
+				.Against.This("for.Length", () =>
+					{
+						for (int i = 0; i < values.Length; i++) {
+							int x = values[i];
+						}
+					})
+				.Against.This("foreach", () =>
+					{
+						foreach (var x in values) ;
+					})
+				.For(10000)
+				.Iterations()
+				.PrintComparison();
 
-		    Benchmark.This("Fast", () =>
-		    {
-		        int i;
-		    })
-            .Against.This("Median",() =>
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var x = Math.Sin(Math.Cos(i));
-                }
-            })
-            .Against.This("Slow", () =>
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    var x = Math.Sin(Math.Cos(i));
-                }
-            })
-            .For(100000)
-            .Iterations()
-            .PrintComparison();
-            
-            Console.WriteLine();
-
-		    Benchmark.This("Fast", () =>
-		    {
-		        int i;
-		    })
-            .Against.This("Median", () =>
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var x = Math.Sin(Math.Cos(i));
-                }
-            })
-            .Against.This("Slow", () =>
-            {
-                for (int i = 0; i < 100000; i++)
-                {
-                    var x = Math.Sin(Math.Cos(i));
-                }
-            })
-            .For(5)
-            .Seconds()
-            .PrintComparison();
-
-		    Console.Read();
+			Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
+				.WithWarmup(1000)
+				.For(5).Seconds()
+				.PrintComparison();
 		}
 	}
 }
