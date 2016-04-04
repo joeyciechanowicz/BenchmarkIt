@@ -232,7 +232,7 @@ namespace BenchmarkIt
                 {
                     Console.Write(outputColumns[c].ToString().PadRight(_iterationResultColumns[c].Width));
                 }
-                Console.Write("\r");
+                Console.Write("\n");
             }
             Console.ForegroundColor = originalColor;
         }
