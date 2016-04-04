@@ -169,7 +169,7 @@ namespace BenchmarkIt
                 {
                     Console.Write(outputColumns[c].ToString().PadRight(_timeResultColumns[c].Width));
                 }
-                Console.Write("\r");
+                Console.WriteLine();
             }
             Console.ForegroundColor = originalColor;
         }
