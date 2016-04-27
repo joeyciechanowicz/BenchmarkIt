@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using BenchmarkIt;
-using System.Threading;
 
 namespace Examples
 {
@@ -13,7 +11,8 @@ namespace Examples
 			Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
 				.Against.This("string.IndexOf", () => "abcdef".IndexOf("ef"))
 				.For(5)
-				.Seconds().PrintComparison();
+				.Seconds()
+                [0].PrintStats();
 
 			var values = Enumerable.Range(1, 100000).ToArray();
 			Benchmark.This("for.Count", () =>
@@ -41,6 +40,8 @@ namespace Examples
 				.WithWarmup(1000)
 				.For(5).Seconds()
 				.PrintComparison();
+
+            Console.Read();
 		}
 	}
 }

@@ -9,22 +9,34 @@ namespace BenchmarkIt
     /// </summary>
     public class Benchmark
     {
-        private readonly List<Tuple<string, Action>> _functions;
+        private struct ActionPair
+        {
+            public string Name { get; private set; }
+            public Action Action { get; private set; }
 
-        private int _amount;
-        private int _warmup=1;
+            public ActionPair(string name, Action action) : this()
+            {
+                Name = name;
+                Action = action;
+            }
+        }
 
-        private readonly Constraint _constraint;
-        private readonly Against _against;
+        private readonly List<ActionPair> actions;
+
+        private int benchmarkLength;
+        private int warmup = 1;
+
+        private readonly Constraint constraint;
+        private readonly Against against;
 
 
         private Benchmark(Action function, string label)
         {
-            _functions = new List<Tuple<string, Action>>();
-            _constraint = new Constraint(this);
-            _against = new Against(this);
+            actions = new List<ActionPair>();
+            constraint = new Constraint(this);
+            against = new Against(this);
 
-            _functions.Add(new Tuple<string, Action>(label, function));
+            actions.Add(new ActionPair(label, function));
         }
 
         /// <summary>
@@ -42,17 +54,17 @@ namespace BenchmarkIt
         /// </summary>
         public Against Against
         {
-            get { return _against; }
+            get { return against; }
         }
 
         /// <summary>
         /// Specify the amount that the benchmark should be ran for (i.e. iterations, minutes etc)
         /// </summary>
-        /// <param name="amount">Amount.</param>
-        public Constraint For(int amount)
+        /// <param name="length">Amount.</param>
+        public Constraint For(int length)
         {
-            _amount = amount;
-            return _constraint;
+            benchmarkLength = length;
+            return constraint;
         }
 
         /// <summary>
@@ -66,7 +78,7 @@ namespace BenchmarkIt
             {
                 throw new ArgumentException("The number of warmup iterations can not be less than one");
             }
-            _warmup = n;
+            warmup = n;
             return this;
         }
 
@@ -75,14 +87,14 @@ namespace BenchmarkIt
         /// </summary>
         internal Result[] Run()
         {
-            switch (_constraint.Type)
+            switch (constraint.Type)
             {
                 case BenchmarkType.Seconds:
-                    return RunForTime(TimeSpan.FromSeconds(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
                 case BenchmarkType.Minutes:
-                    return RunForTime(TimeSpan.FromSeconds(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
                 case BenchmarkType.Hours:
-                    return RunForTime(TimeSpan.FromSeconds(_amount));
+                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
                 default:
                     return RunIterations();
             }
@@ -95,22 +107,26 @@ namespace BenchmarkIt
         /// <param name="function"></param>
         internal void Add(string label, Action function)
         {
-            _functions.Add(new Tuple<string, Action>(label, function));
+            actions.Add(new ActionPair(label, function));
         }
 
         private Result[] RunIterations()
         {
-            var results = new Result[_functions.Count];
+            var results = new Result[actions.Count];
 
             // loop through our function
-            for (int f = 0; f < _functions.Count; f++)
+            for (int f = 0; f < actions.Count; f++)
             {
-                var function = _functions[f].Item2;
+                var action = actions[f].Action;
 
-                for (int i = 0; i < _warmup; i++)
+                // Always warmup at least once
+                action();
+                for (int i = 1; i < warmup; i++)
                 {
-                    function();
+                    action();
                 }
+
+                var sw = new Stopwatch();
 
                 // Give the test as good a chance as possible of avoiding garbage collection
                 GC.Collect();
@@ -118,17 +134,17 @@ namespace BenchmarkIt
                 GC.Collect();
 
                 // benchmark them
-                Stopwatch sw = Stopwatch.StartNew();
-                for (int i = 0; i < this._amount; i++)
+                sw.Start();
+                for (int i = 0; i < benchmarkLength; i++)
                 {
-                    function();
+                    action();
                 }
                 sw.Stop();
 
-                var result = new Result(_functions[f].Item1, _constraint.Type)
+                var result = new Result(actions[f].Name, constraint.Type)
                 {
                     Stopwatch = sw,
-                    TotalIterations = _amount
+                    TotalIterations = benchmarkLength
                 };
 
                 results[f] = result;
@@ -138,17 +154,19 @@ namespace BenchmarkIt
 
         private Result[] RunForTime(TimeSpan amount)
         {
-            var results = new Result[_functions.Count];
+            var results = new Result[actions.Count];
 
             // loop through our function
-            for (int f = 0; f < _functions.Count; f++)
+            for (int f = 0; f < actions.Count; f++)
             {
-                var function = _functions[f].Item2;
+                var function = actions[f].Action;
 
-                for (int i = 0; i < _warmup; i++)
+                for (int i = 0; i < warmup; i++)
                 {
                     function();
                 }
+
+                Stopwatch sw = new Stopwatch();
 
                 // Give the test as good a chance as possible of avoiding garbage collection
                 GC.Collect();
@@ -156,8 +174,8 @@ namespace BenchmarkIt
                 GC.Collect();
 
                 // run the function until we hit the desired time
+                sw.Start();
                 int count = 0;
-                Stopwatch sw = Stopwatch.StartNew();
                 while (sw.Elapsed.Ticks <= amount.Ticks)
                 {
                     count++;
@@ -165,7 +183,7 @@ namespace BenchmarkIt
                 }
                 sw.Stop();
 
-                var result = new Result(_functions[f].Item1, _constraint.Type)
+                var result = new Result(actions[f].Name, constraint.Type)
                 {
                     Stopwatch = sw,
                     TotalIterations = count

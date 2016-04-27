@@ -43,6 +43,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
