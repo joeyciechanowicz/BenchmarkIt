@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace BenchmarkIt
 {
@@ -9,190 +10,152 @@ namespace BenchmarkIt
     /// </summary>
     public class Benchmark
     {
-        private struct ActionPair
+        public static JustClause Just
         {
-            public string Name { get; private set; }
-            public Action Action { get; private set; }
-
-            public ActionPair(string name, Action action) : this()
+            get
             {
-                Name = name;
-                Action = action;
+                return new JustClause();
             }
         }
 
-        private readonly List<ActionPair> actions;
-
-        private int benchmarkLength;
-        private int warmup = 1;
-
-        private readonly Constraint constraint;
-        private readonly Against against;
-
-
-        private Benchmark(Action function, string label)
+        public static ThisClause This(Action action, string label = null)
         {
-            actions = new List<ActionPair>();
-            constraint = new Constraint(this);
-            against = new Against(this);
-
-            actions.Add(new ActionPair(label, function));
+            var benchmark = new Benchmark();
+            benchmark.Add(action, label);
+            return new ThisClause(benchmark);
         }
 
-        /// <summary>
-        /// Create a new benchmark
-        /// </summary>
-        /// <param name="function">Function to be benchmarked</param>
-        /// <param name="label">Label to give the result</param>
-        public static Benchmark This(string label, Action function)
+        public static BenchmarkResults These((Action, string)[] actions)
         {
-            return new Benchmark(function, label);
-        }
-
-        /// <summary>
-        /// Add another function to benchmark against
-        /// </summary>
-        public Against Against
-        {
-            get { return against; }
-        }
-
-        /// <summary>
-        /// Specify the amount that the benchmark should be ran for (i.e. iterations, minutes etc)
-        /// </summary>
-        /// <param name="length">Amount.</param>
-        public Constraint For(int length)
-        {
-            benchmarkLength = length;
-            return constraint;
-        }
-
-        /// <summary>
-        /// Makes the benchmark run the function n times before starting the benchmark
-        /// </summary>
-        /// <param name="n">The number of iterations to run of the function to warmup</param> 
-        /// <value>The benchmark</value>
-        public Benchmark WithWarmup(int n)
-        {
-            if (n < 1)
+            var benchmark = new Benchmark();
+            foreach (var action in actions)
             {
-                throw new ArgumentException("The number of warmup iterations can not be less than one");
+                benchmark.Add(action.Item1, action.Item2);
             }
-            warmup = n;
-            return this;
+            return benchmark.Run();
         }
 
-        /// <summary>
-        /// Runs the benchmark and returns the result
-        /// </summary>
-        internal Result[] Run()
+        public static BenchmarkSettings Settings { get; } = new BenchmarkSettings();
+
+        private List<(Action action, string label)> actions = new List<(Action, string)>();
+        private BenchmarkSettings settings;
+
+        public Benchmark()
         {
-            switch (constraint.Type)
+            settings = Settings;
+        }
+
+        public Benchmark(BenchmarkSettings settings)
+        {
+            this.settings = settings;
+        }
+
+        public BenchmarkResults Run()
+        {
+            var results = actions.Select(x => RunAction(x.action, x.label));
+            return new BenchmarkResults(results.ToArray());
+        }
+
+        private Result RunAction(Action action, string label)
+        {
+            // http://monsur.hossa.in/2012/12/11/benchmarkjs.html
+            // http://ejohn.org/blog/javascript-benchmark-quality/
+            // http://ejohn.org/apps/measure/
+            var (batchSize, batchTime) = CalculateBatchSize(action);
+
+            double error = double.MaxValue;
+            var runTicks = new List<long>();
+            var runs = new List<Run>();
+            var start = DateTime.Now;
+
+            // We will get an error of 0 on the very first run
+            while ((error > settings.MinimumErrorToAccept || runTicks.Count < 3)
+                && (DateTime.Now - start).TotalMilliseconds < settings.MaxTime)
             {
-                case BenchmarkType.Seconds:
-                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
-                case BenchmarkType.Minutes:
-                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
-                case BenchmarkType.Hours:
-                    return RunForTime(TimeSpan.FromSeconds(benchmarkLength));
-                default:
-                    return RunIterations();
+                var sw = Stopwatch.StartNew();
+                for (var i = 0; i < batchSize; i++)
+                {
+                    action();
+                }
+                sw.Stop();
+
+                runTicks.Add(sw.ElapsedTicks);
+                var runStatistics = CalculateRunStatistics(runTicks, batchSize);
+                error = runStatistics.Error;
+                runs.Add(runStatistics);
             }
+
+            var result = new Result()
+            {
+                Label = label,
+                BatchSize = batchSize,
+                BatchTime = batchTime,
+                Runs = runs
+            };
+            return result;
+        }
+                
+        private Run CalculateRunStatistics(List<long> values, int batchSize)
+        {
+            // Only use the last 10 values
+            var valuesToUse = values.Skip(Math.Max(0, values.Count() - settings.BatchesToWorkAcross)).ToArray();
+            var ticks = values.Last();
+
+            // TODO: Not shitty implementation, use a rolling average and standard deviation
+            double mean = valuesToUse.Average();
+            double variance = valuesToUse.Average(v => Math.Pow(v - mean, 2));
+            double deviation = Math.Sqrt(variance);
+
+            double msSpentOnRun = ((double)ticks / (double)Stopwatch.Frequency) * 1000d;
+            double upgradeFactor = 1000 / msSpentOnRun;
+            double operationsPerSecond = batchSize * upgradeFactor;
+
+            int currTDistributionValue = Math.Min(settings.BatchesToWorkAcross, values.Count());
+            double standardErrorsMean = deviation / Math.Sqrt(valuesToUse.Count()) * TDistribution.Values[currTDistributionValue];
+            double error = Math.Max((standardErrorsMean / mean) * 100, 0);
+
+            return new Run()
+            {
+                MeanTicks = mean,
+                StandardDeviation = deviation,
+                Variance = variance,
+                StandardErrorsMean = standardErrorsMean,
+                Error = error,
+                OperationsPerSecond = operationsPerSecond,
+                Ticks = ticks
+            };
         }
 
         /// <summary>
-        /// Adds another function to benchmark
+        /// Calculates how many times we should run our action per batch
         /// </summary>
-        /// <param name="label"></param>
-        /// <param name="function"></param>
-        internal void Add(string label, Action function)
+        private (int batchSize, int batchTime) CalculateBatchSize(Action action)
         {
-            actions.Add(new ActionPair(label, function));
-        }
-
-        private Result[] RunIterations()
-        {
-            var results = new Result[actions.Count];
-
-            // loop through our function
-            for (int f = 0; f < actions.Count; f++)
+            int count = 0;
+            var sw = Stopwatch.StartNew();
+            while (sw.ElapsedMilliseconds < settings.BatchSizeTime)
             {
-                var action = actions[f].Action;
-
-                // Always warmup at least once
                 action();
-                for (int i = 1; i < warmup; i++)
-                {
-                    action();
-                }
-
-                var sw = new Stopwatch();
-
-                // Give the test as good a chance as possible of avoiding garbage collection
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
-                // benchmark them
-                sw.Start();
-                for (int i = 0; i < benchmarkLength; i++)
-                {
-                    action();
-                }
-                sw.Stop();
-
-                var result = new Result(actions[f].Name, constraint.Type)
-                {
-                    Stopwatch = sw,
-                    TotalIterations = benchmarkLength
-                };
-
-                results[f] = result;
+                count++;
             }
-            return results;
+
+            // TODO: Calculate a good batch size based on how long we're taking to run
+            // So slow running actions don't need to be run many times, but fast might need 
+            // running a lot for a shorter period of time
+            return (count, settings.BatchSizeTime);
         }
 
-        private Result[] RunForTime(TimeSpan amount)
+        /// <summary>
+        /// Add an action to benchmark
+        /// </summary>
+        /// <example>Add(() => Math.Sqrt(1.23), "Sqare root benchmark")</example>
+        /// <param name="action">The method to benchmark</param>
+        /// <param name="label">A name for this benchmark</param>
+        public void Add(Action action, string label = null)
         {
-            var results = new Result[actions.Count];
-
-            // loop through our function
-            for (int f = 0; f < actions.Count; f++)
-            {
-                var function = actions[f].Action;
-
-                for (int i = 0; i < warmup; i++)
-                {
-                    function();
-                }
-
-                Stopwatch sw = new Stopwatch();
-
-                // Give the test as good a chance as possible of avoiding garbage collection
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
-                // run the function until we hit the desired time
-                sw.Start();
-                int count = 0;
-                while (sw.Elapsed.Ticks <= amount.Ticks)
-                {
-                    count++;
-                    function();
-                }
-                sw.Stop();
-
-                var result = new Result(actions[f].Name, constraint.Type)
-                {
-                    Stopwatch = sw,
-                    TotalIterations = count
-                };
-
-                results[f] = result;
-            }
-
-            return results;
+            actions.Add(
+                (action,
+                label ?? $"Test {actions.Count + 1}"));
         }
     }
 

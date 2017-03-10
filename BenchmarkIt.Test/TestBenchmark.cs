@@ -8,94 +8,74 @@ namespace BenchmarkIt.Test
 	public class Test
 	{
 		[Test ()]
-		public void TestIterations ()
+		public void TestSingle ()
 		{
-			var result = Benchmark.This ("", () => {}).For (10).Iterations();
+			var result = Benchmark.Just.This(() => {});
 
-		    Assert.AreEqual(1, result.Length);
-			Assert.AreEqual (10, result[0].TotalIterations, "Failed to run for 10 iterations");
+            Assert.IsTrue(result.Length == 1);
+            Assert.AreEqual("Test 1", result[0].Label);
+            Assert.Greater(result[0].OperationsPerSecond, 00);
+            Assert.Greater(result[0].Variance, 0);
+            Assert.Greater(result[0].BatchSize, 0);
+            Assert.Greater(result[0].Error, 0);
+
 
             // Make sure this doesn't throw an exception
-            result[0].PrintStats();
+            result.GetFormattedString();
 		}
 
-		[Test ()]
-		public void TestTime ()
+        [Test()]
+        public void TestSingleWithLabel()
+        {
+            var result = Benchmark.Just.This(() => { }, "My test");
+
+
+            Assert.IsTrue(result.Length == 1);
+            Assert.AreEqual("My test", result[0].Label);
+            Assert.IsTrue(result[0].OperationsPerSecond > 0);
+            Assert.IsTrue(result[0].Variance > 0);
+        }
+
+        [Test ()]
+		public void TestDouble ()
 		{
 			var start = DateTime.Now;
-			var result = Benchmark.This("",() => {}).For (2).Seconds();
+            var result = Benchmark.This(() => { })
+                .Against(() => { Math.Sin(1.2345); });
 
-            Assert.AreEqual(1, result.Length);
-			Assert.IsTrue (result[0].Stopwatch.ElapsedMilliseconds >= 1000, "Benchmark did not run for at least 1 second, only ran for " + result[0].Stopwatch.ElapsedMilliseconds + " ms");
-		}
-
-		[Test()]
-		public void TestCacheWarmup() {
-			var result = Benchmark.This ("",() => {}).WithWarmup (10).For (10).Iterations();
-
-			Assert.AreEqual (10, result[0].TotalIterations, "Failed to run for 10 iterations");
+            Assert.AreEqual("Test 1", result[0].Label);
+            Assert.AreEqual("Test 2", result[1].Label);
+            Assert.Greater(result[0].OperationsPerSecond, result[1].OperationsPerSecond);
 		}
 
         [Test()]
-        public void TestMultipleIterations()
+        public void TestDoubleWithLabel()
         {
-            var result = Benchmark
-                .This("", () => { })
-                .Against.This("", () => Thread.Sleep(10))
-                .For(10).Iterations();
+            var result = Benchmark.This(() => { }, "my test 1")
+                .Against(() => { Math.Sin(1.2345); }, "my test 2");
 
-            Assert.AreEqual(2, result.Length);
-            Assert.Greater(result[1].Stopwatch.ElapsedTicks, result[0].Stopwatch.ElapsedTicks);
-
-            // check that no extension is thrown printing results
-            result.PrintComparison();
+            Assert.AreEqual("my test 1", result[0].Label);
+            Assert.AreEqual("my test 2", result[1].Label);
+            Assert.IsTrue(result[0].OperationsPerSecond > result[1].OperationsPerSecond);
         }
-
+        
         [Test()]
-        public void TestMultipleTimes()
+        public void TestMultipleWithLabels()
         {
-            var result = Benchmark
-                .This("", () => { })
-                .Against.This("", () => Thread.Sleep(10))
-                .For(1).Seconds();
+            var result = Benchmark.These(new (Action, string)[]
+            {
+                (() => { }, "my test 1" ),
+                (() => { }, "my test 2" ),
+                (() => { }, "my test 3" ),
+            });
 
-            Assert.AreEqual(2, result.Length);
-            Assert.Greater(result[0].TotalIterations, 1);
-            Assert.Greater(result[1].TotalIterations, 1);
-            Assert.Greater(result[0].TotalIterations, result[1].TotalIterations);
-
-            // check that no extension is thrown printing results
-            result.PrintComparison();
-        }
-
-        [Test()]
-        public void TestMinutes()
-        {
-            var result = Benchmark
-                .This("", () => { })
-                .For(0).Minutes();
-
-            Assert.Greater(result[0].Stopwatch.ElapsedTicks, 0);
-        }
-
-        [Test()]
-        public void TestHours()
-        {
-            var result = Benchmark
-                .This("", () => { })
-                .For(0).Hours();
-
-            Assert.Greater(result[0].Stopwatch.ElapsedTicks, 0);
-        }
-
-        [Test()]
-        public void TestStats()
-        {
-            var result = Benchmark
-                .This("", () => { })
-                .For(10).Iterations();
-
-            Assert.IsTrue(result[0].Stats.Contains(result[0].Stopwatch.ElapsedMilliseconds.ToString("D")));
+            Assert.AreEqual(result.Length, 3);
+            Assert.Greater(result[0].OperationsPerSecond, 0);
+            Assert.Greater(result[1].OperationsPerSecond, 0);
+            Assert.Greater(result[2].OperationsPerSecond, 0);
+            Assert.AreEqual("my test 1", result[0].Label);
+            Assert.AreEqual("my test 2", result[1].Label);
+            Assert.AreEqual("my test 3", result[2].Label);
         }
 	}
 }
