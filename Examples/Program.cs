@@ -20,9 +20,9 @@ namespace Examples
                 (() => Math.Sin(1.23), "Sin1"),
                 (() => Math.Sin(1.23), "Sin2"),
                 (() => Math.Sin(1.23), "Sin3"),
-                (() => Math.Sin(1.23), "Sin4"),
-                (() => Math.Sin(1.23), "Sin5"),
-            }).PrintStats();
+                //(() => Math.Sin(1.23), "Sin4"),
+                //(() => Math.Sin(1.23), "Sin5"),
+            }).PrintBasic();
 
             Console.Read();
 		}

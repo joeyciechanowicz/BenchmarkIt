@@ -21,7 +21,7 @@ namespace BenchmarkIt.Test
 
 
             // Make sure this doesn't throw an exception
-            result.GetFormattedString();
+            result.PrintBasic();
 		}
 
         [Test()]

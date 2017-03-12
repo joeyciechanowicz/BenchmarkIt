@@ -11,5 +11,6 @@
         public double StandardErrorsMean { get; internal set; }
         public double Error { get; internal set; }
         public double OperationsPerSecond { get; internal set; }
+        public bool ExceededMaxTime { get; internal set; } = false;
     }
 }

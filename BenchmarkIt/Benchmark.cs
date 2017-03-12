@@ -68,10 +68,14 @@ namespace BenchmarkIt
             var runs = new List<Run>();
             var start = DateTime.Now;
 
-            // We will get an error of 0 on the very first run
-            while ((error > settings.MinimumErrorToAccept || runTicks.Count < 3)
-                && (DateTime.Now - start).TotalMilliseconds < settings.MaxTime)
+            // Always run it 2 times at least so we can calculate the standard deviation
+            while ((error > settings.MinimumErrorToAccept || runTicks.Count <= 2))
             {
+                // Give the test as good a chance as possible of avoiding garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
                 var sw = Stopwatch.StartNew();
                 for (var i = 0; i < batchSize; i++)
                 {
@@ -82,8 +86,19 @@ namespace BenchmarkIt
                 runTicks.Add(sw.ElapsedTicks);
                 var runStatistics = CalculateRunStatistics(runTicks, batchSize);
                 error = runStatistics.Error;
+                
+                if ((DateTime.Now - start).TotalMilliseconds > settings.MaxTime)
+                {
+                    runStatistics.ExceededMaxTime = true;
+                    runs.Add(runStatistics);
+                    break;
+                }
+
                 runs.Add(runStatistics);
+                Console.WriteLine($"Error: {error}");
             }
+
+            Console.WriteLine($"Time ran for: {(DateTime.Now - start).TotalMilliseconds}");
 
             var result = new Result()
             {

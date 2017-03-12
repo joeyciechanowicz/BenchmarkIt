@@ -12,7 +12,7 @@ namespace BenchmarkIt
         /// <summary>
         /// The acceptable standard deviation of runs in a batch.
         /// </summary>
-        public double MinimumErrorToAccept { get; set; } = 1d;
+        public double MinimumErrorToAccept { get; set; } = 1.0d;
 
         /// <summary>
         /// The number of batches to keep and to calculate the standard deviation for
