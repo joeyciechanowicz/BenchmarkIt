@@ -20,12 +20,13 @@ Benchmark.This("string.Contains", () => "abcdef".Contains("ef"))
 ```
 Name    Iterations      Percent
 Name                                    Iterations          Percent                       
-string.Contains                         23117812            100%                          string.IndexOf                          10852501            46.9%
+string.Contains                         23117812            100%                          
+string.IndexOf                          10852501            46.9%
 ```
 
-Or you wanted to see if a for loop was actually faster than a foreach loop (it is).
+Or you wanted to see if a foreach loop was actually faster than a for loop (it is).
 ```csharp
-var values = Enumerable.Range(1, 100000).ToArray();
+int[] values = Enumerable.Range(1, 100000).ToArray();
 Benchmark.This("for.Count", () =>
 {
     for (int i = 0; i < values.Count(); i++)
@@ -41,7 +42,7 @@ Benchmark.This("for.Count", () =>
 })
 .Against.This("foreach", () =>
 {
-    foreach (var x in values) ;
+    foreach (int x in values);
 })
 .For(10000)
 .Iterations()
@@ -49,7 +50,9 @@ Benchmark.This("for.Count", () =>
 ```
 ```
 Name                                    Milliseconds        Percent                       
-for.Count                               34305               920.8%                        for.Length                              3725                100%                          foreach                                 4341                116.5%
+for.Count                               46116               9581%                        
+for.Length                              621                 129%                          
+foreach                                 481                 100%
 ```
 
 And why stop there, you can add as many different methods as you want.
